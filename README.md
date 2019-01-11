@@ -55,7 +55,7 @@ terrform import mongodbatlas_vpc_peering_connection.example <project ID>-<pcx id
 Clone and build the repository
 
 ```sh
-go get github.com/akshaykarle/terraform-provider-mongodbatlas
+go get github.com/snowiow/terraform-provider-mongodbatlas
 make build
 ```
 
@@ -68,7 +68,7 @@ ln -s $GOPATH/bin/terraform-provider-mongodbatlas ~/.terraform.d/plugins/
 ## Updating the Provider
 
 ```sh
-go get -u github.com/akshaykarle/terraform-provider-mongodbatlas
+go get -u github.com/snowiow/terraform-provider-mongodbatlas
 make build
 ```
 

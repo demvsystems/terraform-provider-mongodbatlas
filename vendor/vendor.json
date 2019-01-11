@@ -1241,5 +1241,5 @@
 			"revisionTime": "2018-10-15T21:09:59Z"
 		}
 	],
-	"rootPath": "github.com/akshaykarle/terraform-provider-mongodbatlas"
+	"rootPath": "github.com/snowiow/terraform-provider-mongodbatlas"
 }
