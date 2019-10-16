@@ -12,88 +12,88 @@ func dataSourceCluster() *schema.Resource {
 		Read: dataSourceClusterRead,
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"group": &schema.Schema{
+			"group": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"mongodb_major_version": &schema.Schema{
+			"mongodb_major_version": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"backup": &schema.Schema{
+			"backup": {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			"provider_backup": &schema.Schema{
+			"provider_backup": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Computed: true,
 			},
-			"size": &schema.Schema{
+			"size": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"provider_name": &schema.Schema{
+			"provider_name": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"backing_provider": &schema.Schema{
+			"backing_provider": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"disk_size_gb": &schema.Schema{
+			"disk_size_gb": {
 				Type:     schema.TypeFloat,
 				Computed: true,
 			},
-			"replication_factor": &schema.Schema{
+			"replication_factor": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			"num_shards": &schema.Schema{
+			"num_shards": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
-			"paused": &schema.Schema{
+			"paused": {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			"disk_gb_enabled": &schema.Schema{
+			"disk_gb_enabled": {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			"identifier": &schema.Schema{
+			"identifier": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"state": &schema.Schema{
+			"state": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"mongodb_version": &schema.Schema{
+			"mongodb_version": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"mongo_uri": &schema.Schema{
+			"mongo_uri": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"mongo_uri_updated": &schema.Schema{
+			"mongo_uri_updated": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"mongo_uri_with_options": &schema.Schema{
+			"mongo_uri_with_options": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"replication_spec": &schema.Schema{
+			"replication_spec": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Computed: true,

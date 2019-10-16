@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/hashicorp/terraform/plugin"
 	"github.com/demvsystems/terraform-provider-mongodbatlas/mongodbatlas"
+	"github.com/hashicorp/terraform/plugin"
 )
 
 func main() {
