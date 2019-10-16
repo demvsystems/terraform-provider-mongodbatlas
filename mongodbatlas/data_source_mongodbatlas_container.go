@@ -12,33 +12,52 @@ func dataSourceContainer() *schema.Resource {
 		Read: dataSourceContainerRead,
 
 		Schema: map[string]*schema.Schema{
-			"group": &schema.Schema{
+			"group": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"identifier": &schema.Schema{
+			"identifier": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
-			"atlas_cidr_block": &schema.Schema{
+			"atlas_cidr_block": {
 				Type:     schema.TypeString,
+				Optional: true,
+			},
+			"provider_name": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"region": {
+				Type:     schema.TypeString,
+				Optional: true,
+				ForceNew: true,
+			},
+			"vpc_id": {
+				Type:     schema.TypeString,
+				Optional: true,
 				Computed: true,
 			},
-			"provider_name": &schema.Schema{
+			"gcp_project_id": {
 				Type:     schema.TypeString,
+				Optional: true,
 				Computed: true,
 			},
-			"region": &schema.Schema{
+			"network_name": {
 				Type:     schema.TypeString,
+				Optional: true,
 				Computed: true,
 			},
-			"vpc_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"provisioned": &schema.Schema{
+			"provisioned": {
 				Type:     schema.TypeBool,
+				Optional: true,
 				Computed: true,
+			},
+			"private_ip_mode": {
+				Type:     schema.TypeBool,
+				Optional: true,
 			},
 		},
 	}
@@ -55,12 +74,35 @@ func dataSourceContainerRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.SetId(c.ID)
-	d.Set("atlas_cidr_block", c.AtlasCidrBlock)
-	d.Set("provider_name", c.ProviderName)
-	d.Set("region", c.RegionName)
-	d.Set("vpc_id", c.VpcID)
-	d.Set("identifier", c.ID)
-	d.Set("provisioned", c.Provisioned)
+	if err := d.Set("atlas_cidr_block", c.AtlasCidrBlock); err != nil {
+		return fmt.Errorf("error setting atlas_cidr_block for resource %s: %s", d.Id(), err)
+	}
+	if err := d.Set("provider_name", c.ProviderName); err != nil {
+		return fmt.Errorf("error setting provider_name for resource %s: %s", d.Id(), err)
+	}
+	if err := d.Set("identifier", c.ID); err != nil {
+		return fmt.Errorf("error setting identifier for resource %s: %s", d.Id(), err)
+	}
+	if err := d.Set("provisioned", c.Provisioned); err != nil {
+		return fmt.Errorf("error setting provisioned for resource %s: %s", d.Id(), err)
+	}
+
+	if d.Get("provider_name").(string) == "AWS" {
+		if err := d.Set("region", c.RegionName); err != nil {
+			return fmt.Errorf("error setting region for resource %s: %s", d.Id(), err)
+		}
+		if err := d.Set("vpc_id", c.VpcID); err != nil {
+			return fmt.Errorf("error setting vpc_id for resource %s: %s", d.Id(), err)
+		}
+	}
+	if d.Get("provider_name").(string) == "GCP" {
+		if err := d.Set("gcp_project_id", c.GcpProjectID); err != nil {
+			return fmt.Errorf("error setting gcp_project_id for resource %s: %s", d.Id(), err)
+		}
+		if err := d.Set("network_name", c.NetworkName); err != nil {
+			return fmt.Errorf("error setting network_name for resource %s: %s", d.Id(), err)
+		}
+	}
 
 	return nil
 }

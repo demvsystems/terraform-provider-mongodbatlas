@@ -29,106 +29,111 @@ func resourceCluster() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"group": &schema.Schema{
+			"group": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"mongodb_major_version": &schema.Schema{
+			"mongodb_major_version": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"backup": &schema.Schema{
+			"backup": {
 				Type:     schema.TypeBool,
 				Required: true,
 			},
-			"provider_backup": &schema.Schema{
+			"provider_backup": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
-			"size": &schema.Schema{
+			"size": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: false,
 			},
-			"provider_name": &schema.Schema{
+			"provider_name": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"backing_provider": &schema.Schema{
+			"backing_provider": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 			},
-			"region": &schema.Schema{
+			"region": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: false,
 			},
-			"disk_size_gb": &schema.Schema{
+			"disk_size_gb": {
 				Type:     schema.TypeFloat,
 				Optional: true,
 				Computed: true,
 			},
-			"replication_factor": &schema.Schema{
+			"replication_factor": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Default:  3,
 			},
-			"num_shards": &schema.Schema{
+			"num_shards": {
 				Type:     schema.TypeInt,
 				Optional: true,
 				Default:  1,
 			},
-			"paused": &schema.Schema{
+			"paused": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  false,
 			},
-			"disk_gb_enabled": &schema.Schema{
+			"disk_gb_enabled": {
 				Type:     schema.TypeBool,
 				Optional: true,
 				Default:  true,
 			},
-			"identifier": &schema.Schema{
+			"identifier": {
 				Type:     schema.TypeString,
 				Optional: true,
 				ForceNew: true,
 				Computed: true,
 			},
-			"state": &schema.Schema{
+			"state": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-			"mongodb_version": &schema.Schema{
+			"mongodb_version": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-			"mongo_uri": &schema.Schema{
+			"mongo_uri": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-			"mongo_uri_updated": &schema.Schema{
+			"mongo_uri_updated": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-			"mongo_uri_with_options": &schema.Schema{
+			"mongo_uri_with_options": {
 				Type:     schema.TypeString,
 				Optional: true,
 				Computed: true,
 			},
-			"replication_spec": &schema.Schema{
+			"srv_address": {
+				Type:     schema.TypeString,
+				Optional: true,
+				Computed: true,
+			},
+			"replication_spec": {
 				Type:     schema.TypeSet,
 				Optional: true,
 				Computed: true,
@@ -147,6 +152,11 @@ func resourceCluster() *schema.Resource {
 							Required: true,
 						},
 						"read_only_nodes": {
+							Type:     schema.TypeInt,
+							Optional: true,
+							Default:  0,
+						},
+						"analytics_nodes": {
 							Type:     schema.TypeInt,
 							Optional: true,
 							Default:  0,
@@ -230,6 +240,7 @@ func resourceClusterRead(d *schema.ResourceData, meta interface{}) error {
 			"priority":        replicationSpec.Priority,
 			"electable_nodes": replicationSpec.ElectableNodes,
 			"read_only_nodes": replicationSpec.ReadOnlyNodes,
+			"analytics_nodes": replicationSpec.AnalyticsNodes,
 		}
 		replicationSpecs = append(replicationSpecs, spec)
 	}
@@ -238,26 +249,69 @@ func resourceClusterRead(d *schema.ResourceData, meta interface{}) error {
 		log.Printf("[WARN] Error setting replication specs set for (%s): %s", d.Get("name"), err)
 	}
 
-	d.Set("name", c.Name)
-	d.Set("group", c.GroupID)
-	d.Set("mongodb_major_version", c.MongoDBMajorVersion)
-	d.Set("backup", c.BackupEnabled)
-	d.Set("provider_backup", c.ProviderBackupEnabled)
-	d.Set("size", c.ProviderSettings.InstanceSizeName)
-	d.Set("provider_name", c.ProviderSettings.ProviderName)
-	d.Set("backing_provider", c.ProviderSettings.BackingProviderName)
-	d.Set("region", c.ProviderSettings.RegionName)
-	d.Set("disk_size_gb", c.DiskSizeGB)
-	d.Set("disk_gb_enabled", c.AutoScaling.DiskGBEnabled)
-	d.Set("replication_factor", c.ReplicationFactor)
-	d.Set("identifier", c.ID)
-	d.Set("state", c.StateName)
-	d.Set("num_shards", c.NumShards)
-	d.Set("paused", c.Paused)
-	d.Set("mongodb_version", c.MongoDBVersion)
-	d.Set("mongo_uri", c.MongoURI)
-	d.Set("mongo_uri_updated", c.MongoURIUpdated)
-	d.Set("mongo_uri_with_options", c.MongoURIWithOptions)
+	if err := d.Set("name", c.Name); err != nil {
+		log.Printf("[WARN] Error setting name for (%s): %s", d.Get("name"), err)
+	}
+	if err := d.Set("group", c.GroupID); err != nil {
+		log.Printf("[WARN] Error setting group for (%s): %s", d.Get("name"), err)
+	}
+	if err := d.Set("mongodb_major_version", c.MongoDBMajorVersion); err != nil {
+		log.Printf("[WARN] Error setting mongodb_major_version for (%s): %s", d.Get("name"), err)
+	}
+	if err := d.Set("backup", c.BackupEnabled); err != nil {
+		log.Printf("[WARN] Error setting backup for (%s): %s", d.Get("name"), err)
+	}
+	if err := d.Set("provider_backup", c.ProviderBackupEnabled); err != nil {
+		log.Printf("[WARN] Error setting provider_backup for (%s): %s", d.Get("name"), err)
+	}
+	if err := d.Set("size", c.ProviderSettings.InstanceSizeName); err != nil {
+		log.Printf("[WARN] Error setting size for (%s): %s", d.Get("name"), err)
+	}
+	if err := d.Set("provider_name", c.ProviderSettings.ProviderName); err != nil {
+		log.Printf("[WARN] Error setting provider_name for (%s): %s", d.Get("name"), err)
+	}
+	if err := d.Set("backing_provider", c.ProviderSettings.BackingProviderName); err != nil {
+		log.Printf("[WARN] Error setting backing_provider for (%s): %s", d.Get("name"), err)
+	}
+	if err := d.Set("region", c.ProviderSettings.RegionName); err != nil {
+		log.Printf("[WARN] Error setting region for (%s): %s", d.Get("name"), err)
+	}
+	if err := d.Set("disk_size_gb", c.DiskSizeGB); err != nil {
+		log.Printf("[WARN] Error setting disk_size_gb for (%s): %s", d.Get("name"), err)
+	}
+	if err := d.Set("disk_gb_enabled", c.AutoScaling.DiskGBEnabled); err != nil {
+		log.Printf("[WARN] Error setting disk_gb_enabled for (%s): %s", d.Get("name"), err)
+	}
+	if err := d.Set("replication_factor", c.ReplicationFactor); err != nil {
+		log.Printf("[WARN] Error setting replication_factor for (%s): %s", d.Get("name"), err)
+	}
+	if err := d.Set("identifier", c.ID); err != nil {
+		log.Printf("[WARN] Error setting identifier for (%s): %s", d.Get("name"), err)
+	}
+	if err := d.Set("state", c.StateName); err != nil {
+		log.Printf("[WARN] Error setting state for (%s): %s", d.Get("name"), err)
+	}
+	if err := d.Set("num_shards", c.NumShards); err != nil {
+		log.Printf("[WARN] Error setting num_shards for (%s): %s", d.Get("name"), err)
+	}
+	if err := d.Set("paused", c.Paused); err != nil {
+		log.Printf("[WARN] Error setting paused for (%s): %s", d.Get("name"), err)
+	}
+	if err := d.Set("mongodb_version", c.MongoDBVersion); err != nil {
+		log.Printf("[WARN] Error setting mongodb_version for (%s): %s", d.Get("name"), err)
+	}
+	if err := d.Set("mongo_uri", c.MongoURI); err != nil {
+		log.Printf("[WARN] Error setting mongo_uri for (%s): %s", d.Get("name"), err)
+	}
+	if err := d.Set("mongo_uri_updated", c.MongoURIUpdated); err != nil {
+		log.Printf("[WARN] Error setting mongo_uri_updated for (%s): %s", d.Get("name"), err)
+	}
+	if err := d.Set("mongo_uri_with_options", c.MongoURIWithOptions); err != nil {
+		log.Printf("[WARN] Error setting mongo_uri_with_options for (%s): %s", d.Get("name"), err)
+	}
+	if err := d.Set("srv_address", c.SrvAddress); err != nil {
+		log.Printf("[WARN] Error setting srv_address for (%s): %s", d.Get("name"), err)
+	}
 
 	return nil
 }
@@ -269,6 +323,11 @@ func resourceClusterUpdate(d *schema.ResourceData, meta interface{}) error {
 	c, _, err := client.Clusters.Get(d.Get("group").(string), d.Get("name").(string))
 	if err != nil {
 		return fmt.Errorf("Error reading MongoDB Cluster %s: %s", d.Get("name").(string), err)
+	}
+
+	if d.HasChange("mongodb_major_version") {
+		c.MongoDBMajorVersion = d.Get("mongodb_major_version").(string)
+		requestUpdate = true
 	}
 
 	if d.HasChange("backup") {
@@ -285,6 +344,8 @@ func resourceClusterUpdate(d *schema.ResourceData, meta interface{}) error {
 	}
 	if d.HasChange("disk_size_gb") {
 		c.DiskSizeGB = d.Get("disk_size_gb").(float64)
+		// Don't provide IOPS on disk update, it will be calculated
+		c.ProviderSettings.DiskIOPS = 0
 		requestUpdate = true
 	}
 	if d.HasChange("replication_factor") {
@@ -315,6 +376,7 @@ func resourceClusterUpdate(d *schema.ResourceData, meta interface{}) error {
 		c.MongoURI = ""
 		c.MongoURIWithOptions = ""
 		c.MongoURIUpdated = ""
+		c.SrvAddress = ""
 		_, _, err := client.Clusters.Update(d.Get("group").(string), d.Get("name").(string), c)
 		if err != nil {
 			return fmt.Errorf("Error reading MongoDB Cluster %s: %s", d.Get("name").(string), err)
@@ -385,8 +447,12 @@ func resourceClusterImportState(d *schema.ResourceData, meta interface{}) ([]*sc
 	}
 
 	d.SetId(c.ID)
-	d.Set("name", c.Name)
-	d.Set("group", c.GroupID)
+	if err := d.Set("name", c.Name); err != nil {
+		log.Printf("[WARN] Error setting name for (%s): %s", d.Get("name"), err)
+	}
+	if err := d.Set("group", c.GroupID); err != nil {
+		log.Printf("[WARN] Error setting group for (%s): %s", d.Get("name"), err)
+	}
 
 	return []*schema.ResourceData{d}, nil
 }
@@ -418,6 +484,7 @@ func readReplicationSpecsFromSchema(replicationSpecs []interface{}) map[string]m
 			Priority:       replicationSpec["priority"].(int),
 			ElectableNodes: replicationSpec["electable_nodes"].(int),
 			ReadOnlyNodes:  replicationSpec["read_only_nodes"].(int),
+			AnalyticsNodes: replicationSpec["analytics_nodes"].(int),
 		}
 	}
 	return specs

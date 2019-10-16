@@ -13,23 +13,26 @@ func resourceProject() *schema.Resource {
 		Create: resourceProjectCreate,
 		Read:   resourceProjectRead,
 		Delete: resourceProjectDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		Schema: map[string]*schema.Schema{
-			"org_id": &schema.Schema{
+			"org_id": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"created": &schema.Schema{
+			"created": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"cluster_count": &schema.Schema{
+			"cluster_count": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
@@ -67,10 +70,18 @@ func resourceProjectRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error reading MongoDB Project %s: %s", d.Id(), err)
 	}
 
-	d.Set("org_id", p.OrgID)
-	d.Set("name", p.Name)
-	d.Set("created", p.Created)
-	d.Set("cluster_count", p.ClusterCount)
+	if err := d.Set("org_id", p.OrgID); err != nil {
+		log.Printf("[WARN] Error setting org_id for (%s): %s", d.Id(), err)
+	}
+	if err := d.Set("name", p.Name); err != nil {
+		log.Printf("[WARN] Error setting name for (%s): %s", d.Id(), err)
+	}
+	if err := d.Set("created", p.Created); err != nil {
+		log.Printf("[WARN] Error setting created for (%s): %s", d.Id(), err)
+	}
+	if err := d.Set("cluster_count", p.ClusterCount); err != nil {
+		log.Printf("[WARN] Error setting cluster_count for (%s): %s", d.Id(), err)
+	}
 
 	return nil
 }

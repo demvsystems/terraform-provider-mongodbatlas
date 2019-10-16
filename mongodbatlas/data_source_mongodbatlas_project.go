@@ -12,19 +12,19 @@ func dataSourceProject() *schema.Resource {
 		Read: dataSourceProjectRead,
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"org_id": &schema.Schema{
+			"org_id": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"created": &schema.Schema{
+			"created": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"cluster_count": &schema.Schema{
+			"cluster_count": {
 				Type:     schema.TypeInt,
 				Computed: true,
 			},
@@ -41,10 +41,18 @@ func dataSourceProjectRead(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.SetId(p.ID)
-	d.Set("org_id", p.OrgID)
-	d.Set("name", p.Name)
-	d.Set("created", p.Created)
-	d.Set("cluster_count", p.ClusterCount)
+	if err := d.Set("org_id", p.OrgID); err != nil {
+		return fmt.Errorf("error setting org_id for resource %s: %s", d.Id(), err)
+	}
+	if err := d.Set("name", p.Name); err != nil {
+		return fmt.Errorf("error setting name for resource %s: %s", d.Id(), err)
+	}
+	if err := d.Set("created", p.Created); err != nil {
+		return fmt.Errorf("error setting created for resource %s: %s", d.Id(), err)
+	}
+	if err := d.Set("cluster_count", p.ClusterCount); err != nil {
+		return fmt.Errorf("error setting cluster_count for resource %s: %s", d.Id(), err)
+	}
 
 	return nil
 }

@@ -16,22 +16,22 @@ func resourceAlertConfiguration() *schema.Resource {
 		Delete: resourceAlertConfigurationDelete,
 
 		Schema: map[string]*schema.Schema{
-			"event_type_name": &schema.Schema{
+			"event_type_name": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: false,
 			},
-			"group": &schema.Schema{
+			"group": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"enabled": &schema.Schema{
+			"enabled": {
 				Type:     schema.TypeBool,
 				Required: true,
 				ForceNew: false,
 			},
-			"matchers": &schema.Schema{
+			"matchers": {
 				Type:     schema.TypeList,
 				Optional: true,
 				Elem: &schema.Resource{
@@ -51,7 +51,7 @@ func resourceAlertConfiguration() *schema.Resource {
 					},
 				},
 			},
-			"notifications": &schema.Schema{
+			"notifications": {
 				Type:     schema.TypeList,
 				Required: true,
 				Elem: &schema.Resource{
@@ -64,10 +64,7 @@ func resourceAlertConfiguration() *schema.Resource {
 							Type:     schema.TypeInt,
 							Optional: true,
 							DiffSuppressFunc: func(key, oldValue, newValue string, d *schema.ResourceData) bool {
-								if oldValue == "2147483647" {
-									return true
-								}
-								return false
+								return oldValue == "2147483647"
 							},
 						},
 						"delay_min": {
@@ -145,7 +142,7 @@ func resourceAlertConfiguration() *schema.Resource {
 					},
 				},
 			},
-			"metric_threshold": &schema.Schema{
+			"metric_threshold": {
 				Type:     schema.TypeList,
 				Optional: true,
 				MaxItems: 1,
@@ -311,9 +308,15 @@ func resourceDataFromAlertConfiguration(alertConfiguration *ma.AlertConfiguratio
 		log.Printf("[WARN] Error setting metric threshold for (%s): %s", d.Id(), err)
 	}
 
-	d.Set("event_type_name", alertConfiguration.EventTypeName)
-	d.Set("enabled", alertConfiguration.Enabled)
-	d.Set("group", alertConfiguration.GroupID)
+	if err := d.Set("event_type_name", alertConfiguration.EventTypeName); err != nil {
+		log.Printf("[WARN] Error setting event_type_name for (%s): %s", d.Id(), err)
+	}
+	if err := d.Set("enabled", alertConfiguration.Enabled); err != nil {
+		log.Printf("[WARN] Error setting enabled for (%s): %s", d.Id(), err)
+	}
+	if err := d.Set("group", alertConfiguration.GroupID); err != nil {
+		log.Printf("[WARN] Error setting group for (%s): %s", d.Id(), err)
+	}
 }
 
 func readMetricThresholdFromSchema(thresholdMap map[string]interface{}) (threshold ma.MetricThreshold) {

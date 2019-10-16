@@ -25,26 +25,26 @@ func resourceIPWhitelist() *schema.Resource {
 		},
 
 		Schema: map[string]*schema.Schema{
-			"group": &schema.Schema{
+			"group": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"cidr_block": &schema.Schema{
+			"cidr_block": {
 				Type:          schema.TypeString,
 				Optional:      true,
 				Computed:      true,
 				ForceNew:      true,
 				ConflictsWith: []string{"ip_address"},
 			},
-			"ip_address": &schema.Schema{
+			"ip_address": {
 				Type:          schema.TypeString,
 				Optional:      true,
 				Computed:      true,
 				ForceNew:      true,
 				ConflictsWith: []string{"cidr_block"},
 			},
-			"comment": &schema.Schema{
+			"comment": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ValidateFunc: validation.StringLenBetween(0, 80),
@@ -67,7 +67,7 @@ func resourceIPWhitelistCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	params := []ma.Whitelist{
-		ma.Whitelist{
+		{
 			CidrBlock: cidrBlock,
 			GroupID:   d.Get("group").(string),
 			IPAddress: ip,
@@ -99,10 +99,18 @@ func resourceIPWhitelistRead(d *schema.ResourceData, meta interface{}) error {
 		return fmt.Errorf("Error reading MongoDB Project IP Whitelist %s: %s", d.Id(), err)
 	}
 
-	d.Set("cidr_block", w.CidrBlock)
-	d.Set("ip_address", w.IPAddress)
-	d.Set("group", w.GroupID)
-	d.Set("comment", w.Comment)
+	if err := d.Set("cidr_block", w.CidrBlock); err != nil {
+		log.Printf("[WARN] Error setting cidr_block for (%s): %s", d.Id(), err)
+	}
+	if err := d.Set("ip_address", w.IPAddress); err != nil {
+		log.Printf("[WARN] Error setting ip_address for (%s): %s", d.Id(), err)
+	}
+	if err := d.Set("group", w.GroupID); err != nil {
+		log.Printf("[WARN] Error setting group for (%s): %s", d.Id(), err)
+	}
+	if err := d.Set("comment", w.Comment); err != nil {
+		log.Printf("[WARN] Error setting comment for (%s): %s", d.Id(), err)
+	}
 
 	return nil
 }
@@ -142,7 +150,9 @@ func resourceIPWhiteListImportState(d *schema.ResourceData, meta interface{}) ([
 	}
 
 	d.SetId(ip.CidrBlock)
-	d.Set("group", ip.GroupID)
+	if err := d.Set("group", ip.GroupID); err != nil {
+		log.Printf("[WARN] Error setting group for (%s): %s", d.Id(), err)
+	}
 
 	return []*schema.ResourceData{d}, nil
 }
